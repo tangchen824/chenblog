@@ -1,0 +1,1 @@
+<#global contextPath>${request.getContextPath()}</#global>

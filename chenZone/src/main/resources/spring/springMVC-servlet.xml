@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 配置springMVC -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/mvc
+    http://www.springframework.org/schema/mvc/spring-mvc.xsd
+    http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<!-- 主要作用于@Controller，激活该模式 下面是一种简写形式，完全可以手动配置替代这种简写形式； 它会自动注册DefaultAnnotationHandlerMapping与AnnotationMethodHandlerAdapter 
+		两个bean, 是spring MVC为@Controllers分发请求所必须的 -->
+	<!-- 添加注解驱动 -->
+	<mvc:annotation-driven />
+	<!-- 默认扫描的包路径 -->
+	<context:component-scan base-package="com.tc" />
+	
+	<!-- 请求跳转 将主页跳转到/home/index中去 -->
+	<mvc:view-controller path="/" view-name="redirect:/main/home" />
+
+	<!-- 这里拦截器还有一种配置方法【针对路径进行配置】 推荐使用这个，方便直观
+	<mvc:interceptors>
+	  <mvc:interceptor> 
+		<mvc:mapping path="/*" /> <bean class="com.tc.filter.SessionFilter"></bean> 
+	  </mvc:interceptor>
+	</mvc:interceptors> -->
+		
+	<!-- 配置js，css等静态文件直接映射到对应的文件夹，不被DispatcherServlet处理 -->
+	<mvc:resources mapping="/image/**" location="/WEB-INF/resources/image/" />
+	<mvc:resources mapping="/css/**" location="/WEB-INF/resources/css/" />
+	<mvc:resources mapping="/js/**" location="/WEB-INF/resources/js/" />
+	<mvc:resources mapping="/font/**" location="/WEB-INF/resources/font/" />
+	<mvc:resources mapping="/template/**" location="/WEB-INF/resources/template/" />
+
+	<!-- 页面解析器，当Controller返回XXX字符串时，先通过拦截器，然后该类就会在/WEB-INF/views/目录下，查找XXX.xxx文件 -->
+	<!--配置freemarker视图重点配置 视图顺序为 1 -->
+	<bean id="freemarkerResolver"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<property name="cache" value="true" />
+		<property name="order" value="1" />
+		<property name="prefix" value="" />
+		<!--前缀 -->
+		<property name="suffix" value=".html"></property>
+		<!--后缀 -->
+		<property name="contentType" value="text/html;charset=UTF-8" />
+		<!--编码 -->
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.freemarker.FreeMarkerView" />
+		<!--视图文件中可以用${request.getContextPath()}获取文件上下文，类似jsp的request.getContextPath() -->
+		<property name="requestContextAttribute" value="request" />
+		<!--如果freemarker自定义函数的话：有个属性 attributesMap这个属性，里面支持放一个map， key-value的方式来定义你的自定义函数。 
+			类要实现freemarker提供的接口。 -->
+		<property name="exposeRequestAttributes" value="true" /> 
+		<property name="exposeSessionAttributes" value="true" />
+		<!-- 允许使用宏 -->
+		<property name="exposeSpringMacroHelpers" value="true" />
+	</bean>
+
+	<!-- 定义跳转的文件的前后缀 视图顺序为2，没找到1的视图就找这个视图 -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="order" value="2" />
+		<property name="prefix" value="/WEB-INF/views/html/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<!-- 设置freeMarker的配置文件路径 -->
+	<bean id="freemarkerConfiguration"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location" value="classpath:/config/freemarker.properties" />
+	</bean>
+	
+	<!-- 配置freeMarker -->
+	<bean id="freemarkerConfig"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<!-- 配置freeMarker的模板路径，可在前面视图中配置 -->
+		<property name="templateLoaderPaths">
+			<list>
+				<value>/WEB-INF/views/html/</value>
+				<value>/WEB-INF/views/ftl/</value>
+			</list>
+		</property>
+		<!-- 配置文件设置 -->
+		<property name="freemarkerSettings"  ref="freemarkerConfiguration"/>
+		<property name="freemarkerVariables">
+			<map>
+				<entry key="xml_escape" value-ref="fmXmlEscape" />
+				<entry key="extends" value-ref="extendsDirective"/>  
+                <entry key="override" value-ref="overrideDirective"/>  
+                <entry key="block" value-ref="blockDirective"/>  
+                <entry key="super" value-ref="superDirective"/> 
+			</map>
+		</property>
+		<property name="defaultEncoding" value="UTF-8" />
+	</bean>
+	<bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape" />
+	<!-- freemaker  Directive-->
+	<bean id="blockDirective" class="com.tc.freemarker.BlockDirective"/>
+	<bean id="extendsDirective" class="com.tc.freemarker.ExtendsDirective"/>
+	<bean id="overrideDirective" class="com.tc.freemarker.OverrideDirective"/>
+	<bean id="superDirective" class="com.tc.freemarker.SuperDirective"/>
+
+</beans>

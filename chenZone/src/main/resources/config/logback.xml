@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+ 	<property name="APP_Name" value="chenZone" /> 
+	<contextName>${APP_Name}</contextName> 
+	
+	<!-- 控制台輸出 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">   
+    	<encoder>
+    		<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    	</encoder>   
+    </appender> 
+    
+	<!-- 滚动记录文件 -->
+	<appender name="all_debug"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!-- ThresholdFilter:临界值过滤器，过滤掉低于指定临界值的日志。当日志级别等于或高于临界值时，过滤器返回NEUTRAL；当日志级别低于临界值时，日志会被拒绝 -->
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+		<!-- 被写入的文件名，可以是相对目录，也可以是绝对目录，如果上级目录不存在会自动创建，没有默认值 -->
+		<File>D:\file\logs\mylog_all_debug.log</File>
+		<!-- 如果是 true，日志被追加到文件结尾，如果是 false，清空现存文件，默认是true。 -->
+		<append>true</append>
+		<!-- 当发生滚动时，决定 RollingFileAppender 的行为，涉及文件移动和重命名 -->
+		<!-- FixedWindowRollingPolicy 根据固定窗口算法重命名文件的滚动策略 -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<!-- 必须包含“%i”例如，假设最小值和最大值分别为1和2，命名模式为 mylog%i.log,会产生归档文件mylog1.log和mylog2.log。
+				还可以指定文件压缩选项，例如，mylog%i.log.gz 或者 没有log%i.log.zip -->
+			<FileNamePattern>D:\file\logs\mylog_all_debug.%i.log</FileNamePattern>
+			<!-- 窗口索引最小值 -->
+			<MinIndex>1</MinIndex>
+			<!-- 窗口索引最大值 -->
+			<MaxIndex>5</MaxIndex>
+		</rollingPolicy>
+		<!--  查看当前活动文件的大小，如果超过指定大小会告知RollingFileAppender 触发当前活动文件滚动 -->
+		<triggeringPolicy
+			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<!-- 活动文件的大小，默认值是10M -->
+			<MaxFileSize>5MB</MaxFileSize>
+		</triggeringPolicy>
+		<!-- 输出格式 -->
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%date [%thread] %-5level %logger{80} - %msg%n</Pattern>
+		</layout>
+	</appender>
+
+	<appender name="all_error"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!-- LevelFilter：级别过滤器，根据日志级别进行过滤。如果日志级别等于配置级别，过滤器会根据onMath 和 onMismatch接收或拒绝日志
+			如下：将过滤器的日志级别配置为ERROR，所有ERROR级别的日志交给appender处理，非ERROR级别的日志，被过滤掉。
+				DENY，日志将立即被抛弃不再经过其他过滤器；
+				NEUTRAL，有序列表里的下个过滤器过接着处理日志；
+				ACCEPT，日志会被立即处理，不再经过剩余过滤器 -->
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>ERROR</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+		<File>D:\file\logs\mylog_all_error.log</File>
+		<!-- 最常用的滚动策略，它根据时间来制定滚动策略，既负责滚动也负责出发滚动 -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- 必要节点，包含文件名及“%d”转换符， “%d”可以包含一个java.text.SimpleDateFormat指定的时间格式，
+				如：%d{yyyy-MM}。如果直接使用 %d，默认格式是 yyyy-MM-dd。RollingFileAppender 的file字节点可有可无，
+				通过设置file，可以为活动文件和归档文件指定不同位置，当前日志总是记录到file指定的文件（活动文件），活动文件的名字不会改变；
+				如果没设置file，活动文件的名字会根据fileNamePattern 的值，每隔一段时间改变一次。“/”或者“\”会被当做目录分隔符。 -->
+			<FileNamePattern>D:\file\logs\mylog_all_error-%d{yyyy-MM-dd}.log</FileNamePattern>
+			<!-- 可选节点，控制保留的归档文件的最大数量，超出数量就删除旧文件。假设设置每个月滚动，且<maxHistory>是6，
+				则只保存最近6个月的文件，删除之前的旧文件。注意，删除旧文件是，那些为了归档而创建的目录也会被删除 -->
+			<maxHistory>6</maxHistory>
+		</rollingPolicy>
+		<triggeringPolicy
+			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<MaxFileSize>5MB</MaxFileSize>
+		</triggeringPolicy>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%date [%thread] %-5level %logger{80} - %msg%n</Pattern>
+		</layout>
+	</appender>
+	
+	<appender name="debugAppender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>D:\file\logs\mylog_debugAppender_debug.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<FileNamePattern>D:\file\logs\mylog_debugAppender_debug.%i.log</FileNamePattern>
+			<MinIndex>1</MinIndex>
+			<MaxIndex>5</MaxIndex>
+		</rollingPolicy>
+		<triggeringPolicy
+			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<MaxFileSize>5MB</MaxFileSize>
+		</triggeringPolicy>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%date [%thread] %-5level %logger{80} - %msg%n</Pattern>
+		</layout>
+	</appender>
+
+	<logger name="com.tc" level="DEBUG" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	
+	<logger name="org.springframework" level="ERROR" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	
+	<logger name="org.apache" level="ERROR" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	
+	<logger name="freemarker.core" level="ERROR" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<root level="ERROR">
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>
